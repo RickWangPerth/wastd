@@ -93,7 +93,7 @@
 
     function updateReviewLaterStatus(status) {
       var batchId = '{{ form.batch_id.value }}';
-      document.cookie = `${batchId}_do_not_process=${status};path=/;max-age=3600`;
+      document.cookie = `${batchId}_review_later=${status};path=/;max-age=3600`;
     }
   </script>
 {% endblock %}

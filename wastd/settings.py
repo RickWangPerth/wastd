@@ -170,7 +170,7 @@ VERSION_NO = project["tool"]["poetry"]["version"]
 # Database configuration
 DATABASES = {
     # Defined in DATABASE_URL env variable.
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL')),
+    "default": dj_database_url.config(),
     "wamtram2": {
         "ENGINE": "mssql",
         "HOST": os.environ.get("DB_HOST", "host"),
@@ -212,7 +212,6 @@ TIME_ZONE = "Australia/Perth"
 TZ = ZoneInfo(TIME_ZONE)
 UTC = ZoneInfo("UTC")
 USE_TZ = False
-
 
 # Email settings.
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "email.host")
