@@ -878,9 +878,23 @@
     }
   }
 
-  // Initialize background color on page load
+  // Initialize background color and set do_not_process field based on cookies
   document.addEventListener('DOMContentLoaded', function() {
     const doNotProcessField = document.getElementById('{{ form.do_not_process.auto_id }}');
+    const cookiesKeyPrefix = '{{ form.entry_batch.value }}';
+    const doNotProcessCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith(`${cookiesKeyPrefix}_do_not_process`));
+    const doNotProcessValue = doNotProcessCookie ? doNotProcessCookie.split('=')[1] : null;
+
+    if (doNotProcessValue === 'true') {
+      doNotProcessField.checked = true;
+      doNotProcessField.disabled = true;
+    } else if (doNotProcessValue === 'false') {
+      doNotProcessField.checked = false;
+      doNotProcessField.disabled = false;
+    }
+
     doNotProcessField.addEventListener('change', updateBackgroundColor);
     updateBackgroundColor();
   });

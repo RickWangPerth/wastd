@@ -40,11 +40,15 @@
             <h5 class="text-center mt-4">Search for a Tagged Turtle</h5>
             <form method="post" class="w-50 mx-auto text-center mt-3" onsubmit="return validateForm()">
               {% csrf_token %}
-              {% bootstrap_field form.tag_id %}
+              <div class="form-group">
+                <label for="tag_id">Tag ID:</label>
+                <input type="text" class="form-control" id="tag_id" name="tag_id" required>
+              </div>
               <div class="row justify-content-md-center">
                 <input type="submit" value="Search" class="btn btn-primary">
               </div>
             </form>
+            
             <div class="text-center mt-4">{% bootstrap_form_errors form %}</div>
             {% if turtle %}
               <div class="container border pb-3 mt-3">
@@ -56,8 +60,10 @@
                   <div class="col-md-auto"><strong>Status:</strong> {{ turtle.turtle_status }}</div>
                 </div>
               </div>
-              <div class="text-center mt-5">
-                <a href="{% url 'wamtram2:existingtrtdataentry' batch_id=form.batch_id.value turtle_id=turtle.turtle_id %}" class="btn btn-primary">Create New Observation for turtle {{ turtle.turtle_id }}</a>
+              <div class="text-center mt-4">
+                <p>Does the species and sex match the data sheet?</p>
+                <a href="{% url 'wamtram2:existingtrtdataentry' batch_id=form.batch_id.value turtle_id=turtle.turtle_id %}" class="btn btn-primary" onclick="updateReviewLaterStatus(false)">Yes, create for turtle {{ turtle.turtle_id }}</a>
+                <button class="btn btn-secondary ml-2" onclick="createAndReviewLater('{{ form.batch_id.value }}', '{{ form.tag_id.value }}')">No, create the record and review later</button>
               </div>
             {% endif %}
           </div>
@@ -71,13 +77,23 @@
   {{ form.media.js }}
   <script>
     function validateForm() {
-      var tagId = document.getElementById('id_tag_id').value;
+      var tagId = document.getElementById('tag_id').value;
       if (tagId == null || tagId.trim() === "") {
-        alert("Please enter a Tag ID or Turtle ID");
+        alert("Please enter a Tag ID");
         return false;
       }
       return true;
     }
-            
+    
+    function createAndReviewLater(batchId, tagId) {
+      document.cookie = `${batchId}_tag_id=${tagId};path=/;max-age=3600`;
+      document.cookie = `${batchId}_do_not_process=true;path=/;max-age=3600`;
+      window.location.href = `{% url 'wamtram2:newtrtdataentry' batch_id=form.batch_id.value %}`;
+    }
+
+    function updateReviewLaterStatus(status) {
+      var batchId = '{{ form.batch_id.value }}';
+      document.cookie = `${batchId}_do_not_process=${status};path=/;max-age=3600`;
+    }
   </script>
 {% endblock %}

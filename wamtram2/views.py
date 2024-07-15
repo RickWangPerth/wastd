@@ -113,7 +113,6 @@ class EntryBatchesListView(LoginRequiredMixin, ListView):
         }
         return context
 
-
 class EntryBatchDetailView(LoginRequiredMixin, FormMixin, ListView):
     """
     A view for displaying list of a batch of TrtDataEntry objects.
@@ -130,7 +129,6 @@ class EntryBatchDetailView(LoginRequiredMixin, FormMixin, ListView):
         load_templates(): Loads the templates from the templates.json file.
 
     """
-
     model = TrtDataEntry
     template_name = "wamtram2/trtentrybatch_detail.html"
     context_object_name = "batch"
@@ -263,6 +261,38 @@ class EntryBatchDetailView(LoginRequiredMixin, FormMixin, ListView):
             
             return context
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        form.instance.entry_batch_id = self.kwargs.get("batch_id")
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        batch = form.save(commit=False)
+
+        batch_id = batch.entry_batch_id
+
+        # Get the existing instance from the database
+        existing_batch = TrtEntryBatches.objects.get(entry_batch_id=batch_id)
+
+        # Update the PR_DATE_CONVENTION field with the existing value
+        batch.pr_date_convention = existing_batch.pr_date_convention
+        batch.entry_date = existing_batch.entry_date
+        batch.filename = existing_batch.filename
+
+        # Save the batch instance
+        batch.save()
+
+        # Redirect to the success URL
+        return HttpResponseRedirect(self.get_success_url())
+    
+    def get_success_url(self):
+        batch_id = self.kwargs.get("batch_id")
+        return reverse("wamtram2:entry_batch_detail", args=[batch_id])
+
+
 
 class TrtDataEntryFormView(LoginRequiredMixin, FormView):
     """
@@ -320,6 +350,7 @@ class TrtDataEntryFormView(LoginRequiredMixin, FormView):
         selected_template = self.request.COOKIES.get(f'{cookies_key_prefix}_selected_template')
         use_default_enterer = self.request.COOKIES.get(f'{cookies_key_prefix}_use_default_enterer', False)
         default_enterer = self.request.COOKIES.get(f'{cookies_key_prefix}_default_enterer', None)
+        do_not_process = self.request.COOKIES.get(f'{cookies_key_prefix}_do_not_process', 'false') == 'true'
         
         if default_enterer == "None" or not default_enterer or default_enterer == "":
             default_enterer = None
@@ -391,6 +422,10 @@ class TrtDataEntryFormView(LoginRequiredMixin, FormView):
                 ).first()
                 if person:
                     initial["measured_recorded_by_id"] = person.person_id
+                    
+            # Set "do not process" field based on the cookie value
+            if do_not_process:
+                initial['do_not_process'] = True
 
         return initial
 
@@ -439,6 +474,7 @@ class TrtDataEntryFormView(LoginRequiredMixin, FormView):
             context["selected_template"] = self.request.COOKIES.get(f'{cookies_key_prefix}_selected_template')
             context["use_default_enterer"] = self.request.COOKIES.get(f'{cookies_key_prefix}_use_default_enterer', False)
             context["default_enterer"] = self.request.COOKIES.get(f'{cookies_key_prefix}_default_enterer', None)
+            context["do_not_process"] = self.request.COOKIES.get(f'{cookies_key_prefix}_do_not_process', 'false') == 'true'
 
         return context
 
@@ -583,49 +619,51 @@ class FindTurtleView(LoginRequiredMixin, View):
         })
         return render(request, "wamtram2/find_turtle.html", {"form": form})
     def post(self, request, *args, **kwargs):
-        batch_id = kwargs.get("batch_id")
-        form = SearchForm(request.POST, initial={"batch_id": batch_id})
-        no_turtle_found = False # Flag to indicate if no turtle was found
+            batch_id = kwargs.get("batch_id")
+            form = SearchForm(request.POST, initial={"batch_id": batch_id})
+            no_turtle_found = False
+            tag_type = None
 
-        if form.is_valid():
-            tag_id = form.cleaned_data["tag_id"]
-            turtle = None
+            if form.is_valid():
+                tag_id = form.cleaned_data["tag_id"]
+                turtle = None
 
-            try:
-                # Check if the tag is a turtle tag or a pit tag
-                tag = TrtTags.objects.select_related('turtle').filter(tag_id=tag_id).first()
-                if tag:
-                    turtle = tag.turtle
-                else:
-                    pit_tag = TrtPitTags.objects.select_related('turtle').filter(pittag_id=tag_id).first()
-                    if pit_tag:
-                        turtle = pit_tag.turtle
+                try:
+                    tag = TrtTags.objects.select_related('turtle').filter(tag_id=tag_id).first()
+                    if tag:
+                        turtle = tag.turtle
+                        tag_type = "TAG"
+                    else:
+                        pit_tag = TrtPitTags.objects.select_related('turtle').filter(pittag_id=tag_id).first()
+                        if pit_tag:
+                            turtle = pit_tag.turtle
+                            tag_type = "PIT"
 
-                if turtle:
-                    # Prefetch related tags and pit tags
-                    turtle = TrtTurtles.objects.prefetch_related('trttags_set', 'trtpittags_set').get(pk=turtle.pk)
-                    return render(
-                        request,
-                        "wamtram2/find_turtle.html",
-                        {
-                            "form": form,
-                            "turtle": turtle,
-                            "tags": turtle.trttags_set.all(),
-                            "pittags": turtle.trtpittags_set.all(),
-                        },
-                    )
-                else:
-                    raise TrtTags.DoesNotExist
+                    if turtle:
+                        turtle = TrtTurtles.objects.prefetch_related('trttags_set', 'trtpittags_set').get(pk=turtle.pk)
+                        return render(
+                            request,
+                            "wamtram2/find_turtle.html",
+                            {
+                                "form": form,
+                                "turtle": turtle,
+                                "tags": turtle.trttags_set.all(),
+                                "pittags": turtle.trtpittags_set.all(),
+                                "tag_type": tag_type,
+                            },
+                        )
+                    else:
+                        raise TrtTags.DoesNotExist
 
-            except TrtTags.DoesNotExist:
-                form.add_error(None, "No Turtle found with the given tag id.")
-                no_turtle_found = True
+                except TrtTags.DoesNotExist:
+                    form.add_error(None, "No Turtle found with the given tag id.")
+                    no_turtle_found = True
 
-        return render(
-            request,
-            "wamtram2/find_turtle.html",
-            {"form": form, "no_turtle_found": no_turtle_found},
-        )
+            return render(
+                request,
+                "wamtram2/find_turtle.html",
+                {"form": form, "no_turtle_found": no_turtle_found},
+            )
 
 
 class ObservationDetailView(LoginRequiredMixin, DetailView):
