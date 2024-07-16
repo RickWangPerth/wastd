@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Prepare the base environment.
 FROM python:3.11.8-slim as builder_base_wastd
-# NOTE: we're constrained to using the version(s) of Debian which the Microsoft ODBC driver supports.
+# NOTE: we're constrained to using the version(s) of Debian which the Microsoft ODBC driver supports.MAINTAINER asi@dbca.wa.gov.au
 MAINTAINER asi@dbca.wa.gov.au
 LABEL org.opencontainers.image.source https://github.com/dbca-wa/wastd
 
@@ -31,6 +31,9 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi --only main
 
+# Ensure compatible versions of numpy and pandas
+RUN pip install --upgrade numpy pandas
+
 # Create a non-root user.
 ARG UID=10001
 ARG GID=10001
@@ -45,6 +48,8 @@ COPY users ./users
 COPY wastd ./wastd
 COPY wamtram2 ./wamtram2
 COPY marine_mammal_incidents ./marine_mammal_incidents
+
+# Collect static files
 RUN python manage.py collectstatic --noinput
 
 USER ${UID}
