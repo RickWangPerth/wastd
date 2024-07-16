@@ -2,7 +2,7 @@
 # Prepare the base environment.
 FROM python:3.11.8-slim as builder_base_wastd
 # NOTE: we're constrained to using the version(s) of Debian which the Microsoft ODBC driver supports.MAINTAINER asi@dbca.wa.gov.au
-MAINTAINER asi@dbca.wa.gov.au
+LABEL maintainer="asi@dbca.wa.gov.au"
 LABEL org.opencontainers.image.source https://github.com/dbca-wa/wastd
 
 RUN apt-get update -y \
@@ -45,6 +45,8 @@ COPY users ./users
 COPY wastd ./wastd
 COPY wamtram2 ./wamtram2
 COPY marine_mammal_incidents ./marine_mammal_incidents
+
+RUN chmod 666 /app/wamtram2/templates.json
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
