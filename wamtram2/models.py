@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.core.cache import cache
 
 class TrtActivities(models.Model):
     activity_code = models.CharField(
@@ -1499,6 +1500,9 @@ class TrtPersons(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.surname}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.clear() 
 
 class TrtPitTags(models.Model):
     pittag_id = models.CharField(
@@ -1636,6 +1640,10 @@ class TrtPlaces(models.Model):
 
     def __str__(self):
         return f"{self.location_code} - {self.place_name}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.clear() 
 
 
 class TrtRecordedIdentification(models.Model):
@@ -1916,6 +1924,9 @@ class TrtTags(models.Model):
     def __str__(self):
         return f"{self.tag_id}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.clear() 
 
 class TrtTagOrders(models.Model):
     tag_order_id = models.AutoField(

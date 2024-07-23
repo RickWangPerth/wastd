@@ -317,3 +317,10 @@ if SENTRY_DSN and SENTRY_ENVIRONMENT:
         environment=SENTRY_ENVIRONMENT,
         release=VERSION_NO,
     )
+    
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}

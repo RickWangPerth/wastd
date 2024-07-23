@@ -2,65 +2,7 @@ from django import forms
 from django.forms import DateTimeInput
 from easy_select2 import apply_select2
 from .models import TrtPersons, TrtDataEntry, TrtTags, TrtEntryBatches, TrtPlaces, TrtPitTags, TrtPitTags, Template
-from django_select2.forms import ModelSelect2Widget
-
-
-tagWidget = ModelSelect2Widget(
-    queryset=TrtTags.objects.all(),
-    model=TrtTags,
-    search_fields=[
-        "tag_id__icontains",
-    ],
-)
-
-unAssignedTagWidget = ModelSelect2Widget(
-    queryset=TrtTags.objects.filter(tag_status="U"),
-    model=TrtTags,
-    search_fields=[
-        "tag_id__icontains",
-    ],
-)
-
-pitTagWidget = ModelSelect2Widget(
-    queryset=TrtPitTags.objects.all(),
-    model=TrtPitTags,
-    search_fields=[
-        "pittag_id__icontains",
-    ],
-)
-
-unassignedPitTagWidget = ModelSelect2Widget(
-    queryset=TrtPitTags.objects.filter(pit_tag_status="U"),
-    model=TrtPitTags,
-    search_fields=[
-        "pittag_id__icontains",
-    ],
-)
-
-personWidget = ModelSelect2Widget(
-    queryset=TrtPersons.objects.all(),
-    model=TrtPersons,
-    search_fields=["first_name__icontains", "surname__icontains"],
-)
-
-placeWidget = ModelSelect2Widget(
-    queryset=TrtPlaces.objects.all(),
-    model=TrtPlaces,
-    search_fields=["place_name__icontains", "location_code__location_name__icontains"],
-    attrs={'data-required': 'true'} 
-)
-
-
-class CustomModelSelect2Widget(ModelSelect2Widget):
-    model = TrtTags  # Default model
-
-    def filter_queryset(self, request, term, queryset=None, **dependent_fields):
-        trt_tags = TrtTags.objects.filter(tag_id__icontains=term)
-        trt_pit_tags = TrtPitTags.objects.filter(pittag_id__icontains=term)
-        return list(trt_pit_tags) + list(trt_tags)
-
-    def get_queryset(self):
-        return self.model.objects.all()
+from .widgets import tagWidget, unAssignedTagWidget, pitTagWidget, unassignedPitTagWidget, personWidget, placeWidget, CustomModelSelect2Widget
 
 
 class SearchForm(forms.Form):
