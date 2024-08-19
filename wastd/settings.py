@@ -27,6 +27,7 @@ INTERNAL_IPS = ["127.0.0.1", "::1"]
 ROOT_URLCONF = "wastd.urls"
 WSGI_APPLICATION = "wastd.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # This is required to add context variables to all templates:
 STATIC_CONTEXT_VARS = {}
@@ -79,7 +80,8 @@ INSTALLED_APPS = [
     "users",
     "observations",
     "marine_mammal_incidents",
-    "wamtram2"
+    "wamtram2",
+    'sqlagent',
 ]
 MIDDLEWARE = [
     "wastd.middleware.HealthCheckMiddleware",

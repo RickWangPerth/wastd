@@ -23,6 +23,7 @@ urlpatterns = [
     path("observations/", include(("observations.urls"), namespace="observations")),
     path("wamtram2/", include(("wamtram2.urls"), namespace="wamtram2")),
     path("map/", observations_views.MapView.as_view(), name="map"),
+    path('sqlagent/', include('sqlagent.urls')),
     # API
     path('api/1/', include((api_urlpatterns, "wastd"), namespace="api")),
     # Spatial data layers

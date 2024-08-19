@@ -45,6 +45,9 @@ django-bootstrap4 = "24.1"
 django-easy-select2 = "1.5.8"
 sentry-sdk = {version = "1.45.0", extras = ["django"]}
 django-debug-toolbar = "^4.4.2"
+langchain = "^0.2.14"
+openai = "^1.41.0"
+langchain-community = "^0.2.12"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.23.0"
