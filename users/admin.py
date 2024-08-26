@@ -58,6 +58,7 @@ class UserAdmin(AuthUserAdmin):
                     "organisations",
                     "phone",
                     "alive",
+                    "has_agreed_to_terms",
                 )
             },
         ),
@@ -80,6 +81,7 @@ class UserAdmin(AuthUserAdmin):
         "is_staff",
         "is_active",
         "alive",
+        "has_agreed_to_terms",
     )
     search_fields = [
         "email",

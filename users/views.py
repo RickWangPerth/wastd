@@ -19,6 +19,9 @@ from wastd.utils import (
     ResourceDownloadMixin,
 )
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
 from .models import User
 from .forms import UserMergeForm, TransferForm
 from .filters import UserFilter
@@ -194,3 +197,14 @@ def transfer_user_view(request, old_pk, new_pk, area_pk):
     messages.success(request, msg)
 
     return HttpResponseRedirect(reverse("users:user-detail", kwargs={"pk": new.pk}))
+
+
+@login_required
+def terms_and_conditions(request):
+    if request.method == "POST":
+        user = request.user
+        user.has_agreed_to_terms = True
+        user.save()
+        return redirect('home')
+
+    return render(request, 'users/terms_and_conditions.html')

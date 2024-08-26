@@ -67,7 +67,7 @@ COPY marine_mammal_incidents ./marine_mammal_incidents
 # Convert line endings from CRLF to LF
 # RUN dos2unix /app/entrypoint.sh /app/wait-for-db.sh /app/createsuperuser.sh
 RUN chmod +x /app/entrypoint.sh /app/wait-for-db.sh /app/createsuperuser.sh /app/createentereruser.sh
-
+RUN chmod -R 775 /usr/local/lib/python3.11/site-packages/django_fsm_log/migrations/
 USER ${UID}
 EXPOSE 8080
 

@@ -14,4 +14,5 @@ urlpatterns = [
     path("transfer/", views.TransferView.as_view(), name="user-transfer"),
     path("merge/", views.UserMergeView.as_view(), name="user-merge"),
     path("redirect/", views.UserRedirectView.as_view(), name="redirect"),
+    path('terms-and-conditions/', views.terms_and_conditions, name='terms_and_conditions'),
 ]

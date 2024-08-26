@@ -1,0 +1,48 @@
+{% extends "base_wastd.html" %}
+
+{% block title %}Terms and Conditions{% endblock %}
+
+{% block page_content_inner %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-file-contract"></i> Terms and Conditions</h4>
+        </div>
+        <div class="card-body">
+            <p>
+                Please read these terms and conditions carefully before using our services.
+                By using our services, you agree to be bound by these terms. If you do not agree to these terms,
+                please do not use our services.
+            </p>
+            <hr>
+            <h5 class="mb-3">1. Introduction</h5>
+            <p>Here you can provide an introduction to your terms and conditions, explaining the purpose of this document.</p>
+
+            <h5 class="mb-3">2. User Responsibilities</h5>
+            <p>Detail the responsibilities that users must adhere to when using your service.</p>
+
+            <h5 class="mb-3">3. Data Privacy</h5>
+            <p>Describe how user data will be handled, including any privacy policies.</p>
+
+            <h5 class="mb-3">4. Intellectual Property</h5>
+            <p>Explain the ownership of content and intellectual property rights.</p>
+
+            <h5 class="mb-3">5. Liability</h5>
+            <p>Clarify your organization's liability in different situations.</p>
+
+            <h5 class="mb-3">6. Changes to Terms</h5>
+            <p>Inform users about how and when you may change these terms.</p>
+
+            <!-- Add more sections as needed -->
+
+            <hr>
+            <form method="post" class="text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg mt-3">
+                    <i class="fas fa-check"></i> I Agree
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock page_content_inner %}

@@ -79,6 +79,11 @@ class User(AbstractUser):
         default=True,
         help_text="Deceased users should not be attempted to be contacted.",
     )
+    has_agreed_to_terms = models.BooleanField(
+        default=False,
+        verbose_name="Has Agreed to Terms",
+        help_text="Indicates whether the user has agreed to the terms and conditions."
+    )
 
     class Meta:
         ordering = ["name", "username"]

@@ -93,6 +93,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "reversion.middleware.RevisionMiddleware",
     "dbca_utils.middleware.SSOLoginMiddleware",
+    'users.middleware.TermsAndConditionsMiddleware',
 ]
 
 TEMPLATES = [
