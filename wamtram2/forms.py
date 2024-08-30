@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import DateTimeInput
 from easy_select2 import apply_select2
-from .models import TrtPersons, TrtDataEntry, TrtTags, TrtEntryBatches, TrtPlaces, TrtPitTags, TrtPitTags, Template, TrtObservations,TrtTagStates
+from .models import TrtPersons, TrtDataEntry, TrtTags, TrtEntryBatches, TrtPlaces, TrtPitTags, TrtPitTags, Template, TrtObservations,TrtTagStates, TrtDamageCodes
 from django_select2.forms import ModelSelect2Widget
 
 
@@ -73,6 +73,12 @@ class SearchForm(forms.Form):
     selected_template = forms.CharField(required=False, widget=forms.HiddenInput())
     use_default_enterer = forms.BooleanField(required=False, widget=forms.HiddenInput())
     
+class DateTimeForm(forms.Form):
+    observation_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        input_formats=['%Y-%m-%dT%H:%M'],
+    )
+
 
 class TrtEntryBatchesForm(forms.ModelForm):
     class Meta:
@@ -231,7 +237,7 @@ class TrtDataEntryForm(forms.ModelForm):
         widgets = {
             "turtle_id": forms.HiddenInput(),
             "entry_batch": forms.HiddenInput(),
-            "observation_date": DateTimeInput(attrs={"type": "datetime-local"}),
+            "observation_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
 
             "measured_by_id": forms.HiddenInput(),
             "recorded_by_id": forms.HiddenInput(),
@@ -263,15 +269,22 @@ class TrtDataEntryForm(forms.ModelForm):
         old_tag_states = TrtTagStates.objects.filter(
             tag_state__in=["RQ", "RC", "OO", "OX", "P", "P_ED", "P_OK", "PX"]
         )
+        
         self.fields['recapture_left_tag_state'].queryset = old_tag_states
         self.fields['recapture_right_tag_state'].queryset = old_tag_states
         self.fields['recapture_left_tag_state_2'].queryset = old_tag_states
         self.fields['recapture_right_tag_state_2'].queryset = old_tag_states
+        
+        # Filter the queryset for damage codes
+        self.fields["damage_carapace"].queryset = TrtDamageCodes.objects.filter(
+            damage_code__in=["0", "5", "6", "7"]
+        )
 
         self.fields["observation_date"].required = True
         self.fields["species_code"].required = True
         self.fields["place_code"].required = True
         self.fields["sex"].required = True
+        self.fields["clutch_completed"].required = True
         
         self.fields["latitude"].label = "Latitude (-xx.xxxxxx)"
         self.fields["longitude"].label = "Longitude (xxx.xxxxxx)"
@@ -314,7 +327,7 @@ class TrtDataEntryForm(forms.ModelForm):
         self.fields["curved_carapace_length"].label = "CCL max (mm)"
         self.fields["curved_carapace_width"].label = "CCW (mm)"
         self.fields["curved_carapace_length_notch"].label = "CCL min (mm)"
-        self.fields["clutch_completed"].label = "Did turtle lay?"
+        self.fields["clutch_completed"].label = "Did the turtle lay?"
         self.fields["damage_carapace"].label = "Carapace"
         self.fields["damage_lff"].label = "Left front flipper"
         self.fields["damage_rff"].label = "Right front flipper"
@@ -342,10 +355,10 @@ class TrtDataEntryForm(forms.ModelForm):
         self.fields["recapture_left_tag_barnacles_2"].label = ""
         self.fields["recapture_right_tag_barnacles"].label = ""
         self.fields["recapture_right_tag_barnacles_2"].label = ""
-        self.fields["new_left_tag_barnacles"].label = ""
-        self.fields["new_left_tag_barnacles_2"].label = ""
-        self.fields["new_right_tag_barnacles"].label = ""
-        self.fields["new_right_tag_barnacles_2"].label = ""
+        # self.fields["new_left_tag_barnacles"].label = ""
+        # self.fields["new_left_tag_barnacles_2"].label = ""
+        # self.fields["new_right_tag_barnacles"].label = ""
+        # self.fields["new_right_tag_barnacles_2"].label = ""
         
         self.fields["cc_notch_length_not_measured"].label = "CCL min not measured"
         
