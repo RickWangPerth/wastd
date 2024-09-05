@@ -203,9 +203,9 @@ class TrtDataEntry(models.Model):
         ("I", "Indeterminate"),
     ]
     TAG_POSITION_CHOICES = [
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
+        (1, ' scale 1'),
+        (2, 'scale 2'),
+        (3, 'scale 3'),
     ]
     data_entry_id = models.AutoField(
         db_column="DATA_ENTRY_ID", primary_key=True
@@ -2370,7 +2370,7 @@ class Template(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
 
     class Meta:
-        db_table = 'TRT_TEMPLATES'
+        db_table = 'TRT_TEMPLATE'
         
     def __str__(self):
         return self.name
