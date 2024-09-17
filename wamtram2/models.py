@@ -2431,21 +2431,21 @@ SEX_CHOICES = [
     ("I", "Indeterminate"),
 ]
 class Template(models.Model):
-    template_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
-    location_code = models.CharField(max_length=50)
-    place_code = models.CharField(max_length=50)
-    species_code = models.CharField(max_length=50)
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
+    TEMPLATE_ID = models.AutoField(primary_key=True)
+    NAME = models.CharField(max_length=255, unique=True)
+    LOCATION_CODE = models.CharField(max_length=50)
+    PLACE_CODE = models.CharField(max_length=50)
+    SPECIES_CODE = models.CharField(max_length=50)
+    SEX = models.CharField(max_length=1, choices=SEX_CHOICES)
 
     class Meta:
         db_table = 'TRT_TEMPLATES'
         
     def __str__(self):
-        return self.name
+        return self.NAME
     
     def clean(self):
-        if Template.objects.filter(name=self.name).exists():
+        if Template.objects.filter(name=self.NAME).exists():
             raise ValidationError({'name': 'Template with this name already exists.'})
 
     def save(self, *args, **kwargs):
