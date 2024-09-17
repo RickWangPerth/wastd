@@ -1271,7 +1271,7 @@ class TrtEntryBatches(models.Model):
     template = models.ForeignKey(
         "Template",  
         models.SET_NULL,
-        db_column="template",
+        db_column="TEMPLATE",
         blank=True,
         null=True,
     )
@@ -2439,7 +2439,7 @@ class Template(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
 
     class Meta:
-        db_table = 'TRT_TEMPLATE'
+        db_table = 'TRT_TEMPLATES'
         
     def __str__(self):
         return self.name
