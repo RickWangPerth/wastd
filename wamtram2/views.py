@@ -1117,7 +1117,7 @@ class ValidateTagView(View):
             JsonResponse: The JSON response.
         """
         turtle_id = request.GET.get('turtle_id')
-        tag = request.GET.get('tag', '').upper()
+        tag = request.GET.get('tag', '')
         side = request.GET.get('side')
 
         print(turtle_id, tag, side)
@@ -1193,7 +1193,7 @@ class ValidateTagView(View):
         Returns:
             JsonResponse: The JSON response.
         """
-        tag = request.GET.get('tag', '').upper()
+        tag = request.GET.get('tag', '')
         if not tag:
             return JsonResponse({'valid': False, 'message': 'Missing tag parameter'})
 
@@ -1801,12 +1801,20 @@ def quick_add_batch(request):
         comments = request.POST.get('comments', '')
         template_id = request.POST.get('template')
         entered_person_id = request.POST.get('entered_person_id')
+        location_code = request.POST.get('location_code')
         
-        entered_person = get_object_or_404(TrtPersons, pk=entered_person_id)
+        if entered_person_id:
+            try:
+                entered_person = TrtPersons.objects.get(pk=entered_person_id)
+            except TrtPersons.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Invalid entered person ID.'})
+        else:
+            entered_person = None 
         
         template = None
         if template_id:
             template = get_object_or_404(Template, pk=template_id)
+            
 
         batch = TrtEntryBatches.objects.create(
             batches_code=batches_code,
