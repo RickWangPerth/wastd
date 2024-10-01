@@ -1,6 +1,6 @@
 from django import forms
 from easy_select2 import apply_select2
-from .models import TrtPersons, TrtDataEntry, TrtTags, TrtEntryBatches, TrtPlaces, TrtPitTags, Template, TrtObservations,TrtTagStates, TrtMeasurementTypes,TrtYesNo
+from .models import TrtPersons, TrtDataEntry, TrtTags, TrtEntryBatches, TrtPlaces, TrtPitTags, Template, TrtObservations,TrtTagStates, TrtMeasurementTypes,TrtYesNo,TrtSpecies
 from django_select2.forms import ModelSelect2Widget
 from django.core.validators import RegexValidator
 
@@ -271,6 +271,9 @@ class TrtDataEntryForm(forms.ModelForm):
             'placeholder': 'Enter name',
         })
         
+        self.fields['species_code'].queryset = TrtSpecies.objects.exclude(species_code='0')
+        
+        
         nesting_choices = TrtYesNo.objects.filter(code__in=['N', 'P', 'Y'])
         self.fields['nesting'].queryset = nesting_choices
 
@@ -500,6 +503,17 @@ class TrtDataEntryForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         do_not_process = cleaned_data.get("do_not_process")
+        
+        tag_fields = [
+            'recapture_left_tag_id', 'recapture_left_tag_id_2', 'recapture_left_tag_id_3',
+            'recapture_right_tag_id', 'recapture_right_tag_id_2', 'recapture_right_tag_id_3',
+            'new_left_tag_id', 'new_left_tag_id_2', 'new_right_tag_id', 'new_right_tag_id_2',
+            'dud_filpper_tag', 'dud_filpper_tag_2'
+        ]
+        
+        for field in tag_fields:
+            if cleaned_data.get(field):
+                cleaned_data[field] = cleaned_data[field].upper()
 
         if do_not_process:
             return cleaned_data

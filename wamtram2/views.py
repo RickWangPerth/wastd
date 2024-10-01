@@ -798,6 +798,13 @@ class FindTurtleView(LoginRequiredMixin, View):
         turtle = None
         create_and_review = request.POST.get('create_and_review') == 'true'
         new_tag_entry = None
+        batch = None
+        template_name = "No template associated"
+        
+        if batch_id:
+            batch = TrtEntryBatches.objects.filter(entry_batch_id=batch_id).first()
+            if batch and batch.template:
+                template_name = batch.template.name
 
         if form.is_valid():
             tag_id = form.cleaned_data["tag_id"]
@@ -856,6 +863,8 @@ class FindTurtleView(LoginRequiredMixin, View):
                         "tag_type": tag_type,
                         "tag_side": tag_side,
                         "batch_id": batch_id,
+                        "batch": batch,
+                        "template_name": template_name,
                     })
                     return self.set_cookie(response, batch_id, tag_id, tag_type, tag_side, no_turtle_found)
                 else:
@@ -1108,7 +1117,7 @@ class ValidateTagView(View):
             JsonResponse: The JSON response.
         """
         turtle_id = request.GET.get('turtle_id')
-        tag = request.GET.get('tag')
+        tag = request.GET.get('tag', '').upper()
         side = request.GET.get('side')
 
         print(turtle_id, tag, side)
@@ -1184,7 +1193,7 @@ class ValidateTagView(View):
         Returns:
             JsonResponse: The JSON response.
         """
-        tag = request.GET.get('tag')
+        tag = request.GET.get('tag', '').upper()
         if not tag:
             return JsonResponse({'valid': False, 'message': 'Missing tag parameter'})
 
