@@ -1843,7 +1843,6 @@ def quick_add_batch(request):
         comments = request.POST.get('comments', '')
         template_id = request.POST.get('template')
         entered_person_id = request.POST.get('entered_person_id')
-        location_code = request.POST.get('location_code')
         
         if entered_person_id:
             try:
@@ -1855,7 +1854,10 @@ def quick_add_batch(request):
         
         template = None
         if template_id:
-            template = get_object_or_404(Template, pk=template_id)
+            try:
+                template = Template.objects.get(pk=template_id)
+            except Template.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Invalid template ID.'})
             
 
         batch = TrtEntryBatches.objects.create(
@@ -1874,6 +1876,16 @@ def quick_add_batch(request):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
+    
+def search_templates(request):
+    query = request.GET.get('q', '')
+    if len(query) >= 2:
+        templates = Template.objects.filter(
+            Q(name__icontains=query)
+        )[:10]
+        data = [{'template_id': t.template_id, 'name': t.name} for t in templates]
+        return JsonResponse(data, safe=False)
+    return JsonResponse([], safe=False)
     
 class BatchCodeManageView(View):
     template_name = 'wamtram2/add_batches_code.html'
@@ -1909,6 +1921,9 @@ class BatchCodeManageView(View):
             entered_person = batch.entered_person_id
             entered_person_full_name = str(entered_person) if entered_person else ''
             entered_person_id = entered_person.person_id if entered_person else ''
+            template = batch.template
+            template_name = template.name if template else ''
+            template_id = template.template_id if template else ''
         else:
             form = BatchesCodeForm()
             entered_person_full_name = ''
@@ -1920,7 +1935,6 @@ class BatchCodeManageView(View):
         templates = Template.objects.all()
 
         entered_person_full_name = str(form.instance.entered_person_id) if form.instance.entered_person_id else ''
-        template_selected = form.instance.template.template_id if form.instance.template else None
         context = {
             'form': form,
             'locations': locations,
@@ -1930,7 +1944,8 @@ class BatchCodeManageView(View):
             'batch_id': batch_id,
             'entered_person_full_name': entered_person_full_name,
             'entered_person_id': entered_person_id,
-            'template_selected': template_selected,
+            'template_name': template_name,
+            'template_id': template_id,
         }
         return render(request, self.template_name, context)
 
