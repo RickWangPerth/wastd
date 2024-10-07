@@ -2456,15 +2456,22 @@ class Template(models.Model):
     place_code = models.CharField(max_length=50,db_column="PLACE_CODE", blank=True, null=True)
     species_code = models.CharField(max_length=50, db_column="SPECIES_CODE", blank=True, null=True)
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, db_column="SEX", blank=True, null=True)
+    TEMPLATE_ID = models.AutoField(primary_key=True)
+    NAME = models.CharField(max_length=255, unique=True)
+    LOCATION_CODE = models.CharField(max_length=50)
+    PLACE_CODE = models.CharField(max_length=50)
+    SPECIES_CODE = models.CharField(max_length=50)
+    SEX = models.CharField(max_length=1, choices=SEX_CHOICES)
 
     class Meta:
         db_table = 'TRT_TEMPLATES'
+        db_table = 'TRT_TEMPLATES'
         
     def __str__(self):
-        return self.name
+        return self.NAME
     
     def clean(self):
-        if Template.objects.filter(name=self.name).exists():
+        if Template.objects.filter(name=self.NAME).exists():
             raise ValidationError({'name': 'Template with this name already exists.'})
 
     def save(self, *args, **kwargs):
